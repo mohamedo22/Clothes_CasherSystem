@@ -1,0 +1,254 @@
+<UserControl x:Class="CasherSystem.Views.ReportsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             FlowDirection="RightToLeft"
+             Background="{DynamicResource MaterialDesignPaper}">
+
+    <UserControl.Resources>
+        <Style x:Key="ReportCardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="materialDesign:ShadowAssist.ShadowDepth" Value="Depth1"/>
+        </Style>
+        
+        <Style x:Key="ReportValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="ReportLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,5,0,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <!-- Header -->
+            <TextBlock Text="صفحة التقارير" 
+                       Style="{StaticResource MaterialDesignHeadline3TextBlock}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,30"
+                       Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+            <!-- Date Range Selection -->
+            <materialDesign:Card Margin="0,0,0,20" Padding="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Start Date -->
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="من تاريخ" 
+                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                   Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding StartDate}"
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                    FlowDirection="RightToLeft"/>
+                    </StackPanel>
+
+                    <!-- End Date -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="إلى تاريخ" 
+                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                   Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding EndDate}"
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                    FlowDirection="RightToLeft"/>
+                    </StackPanel>
+
+                    <!-- Generate Report Button -->
+                    <Button Height="40"
+                            Grid.Column="2" 
+                            Click="GenerateReportButton_Click"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            VerticalAlignment="Bottom"
+                            Margin="20,0,0,6">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ChartLine" 
+                                                       Width="20" Height="20" 
+                                                       Margin="0,0,10,0"/>
+                                <TextBlock Text="عرض التقرير" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Summary Cards -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Sales Total -->
+                <materialDesign:Card Grid.Column="0" Style="{StaticResource ReportCardStyle}">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="CurrencyUsd" 
+                                               Width="32" Height="32" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="{Binding SalesTotal, StringFormat='{}{0:C}'}" 
+                                   Style="{StaticResource ReportValueStyle}"/>
+                        <TextBlock Text="إجمالي المبيعات" Style="{StaticResource ReportLabelStyle}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Sales Count -->
+                <materialDesign:Card Grid.Column="1" Style="{StaticResource ReportCardStyle}">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="Receipt" 
+                                               Width="32" Height="32" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="{Binding SalesCount}" 
+                                   Style="{StaticResource ReportValueStyle}"/>
+                        <TextBlock Text="عدد الفواتير" Style="{StaticResource ReportLabelStyle}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Purchases Total -->
+                <materialDesign:Card Grid.Column="2" Style="{StaticResource ReportCardStyle}">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="Shopping" 
+                                               Width="32" Height="32" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="{Binding PurchasesTotal, StringFormat='{}{0:C}'}" 
+                                   Style="{StaticResource ReportValueStyle}"/>
+                        <TextBlock Text="إجمالي المشتريات" Style="{StaticResource ReportLabelStyle}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Returns Total -->
+                <materialDesign:Card Grid.Column="3" Style="{StaticResource ReportCardStyle}">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="Undo" 
+                                               Width="32" Height="32" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="{Binding ReturnsTotal, StringFormat='{}{0:C}'}" 
+                                   Style="{StaticResource ReportValueStyle}"/>
+                        <TextBlock Text="إجمالي المرتجعات" Style="{StaticResource ReportLabelStyle}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Net Profit -->
+                <materialDesign:Card Grid.Column="4" Style="{StaticResource ReportCardStyle}">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="TrendingUp" 
+                                               Width="32" Height="32" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="{Binding NetProfit, StringFormat='{}{0:C}'}" 
+                                   Style="{StaticResource ReportValueStyle}"/>
+                        <TextBlock Text="صافي الربح" Style="{StaticResource ReportLabelStyle}"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
+
+            <!-- Top Selling Products -->
+            <!--Grid Margin="0,30,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="300"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" 
+                           Text="أكثر 5 منتجات مبيعًا" 
+                           Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+
+                <materialDesign:Card Grid.Row="1" Style="{StaticResource ReportCardStyle}">
+                    <ListBox ItemsSource="{Binding TopSellingProducts}" 
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" 
+                                               Text="{Binding ProductName}" 
+                                               VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBlock Text="{Binding QuantitySold}" 
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                        <TextBlock Text=" قطعة" 
+                                                   VerticalAlignment="Center"
+                                                   Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </materialDesign:Card>
+            </Grid-->
+
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center" 
+                        Margin="0,30,0,0">
+                <Button 
+                        Click="PrintReportButton_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Margin="0,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Printer" 
+                                                   Width="20" Height="20" 
+                                                   Margin="0,0,10,0"/>
+                            <TextBlock Text="طباعة التقرير" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+                <Button 
+                        Click="ExportToPdfButton_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Margin="10,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileDocument" 
+                                                   Width="20" Height="20" 
+                                                   Margin="0,0,10,0"/>
+                            <TextBlock Text="تصدير إلى PDF" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+                <Button 
+                        Click="ExportToExcelButton_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Margin="10,0,0,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileTable" 
+                                                   Width="20" Height="20" 
+                                                   Margin="0,0,10,0"/>
+                            <TextBlock Text="تصدير إلى Excel" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

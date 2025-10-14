@@ -1,0 +1,187 @@
+﻿<Page x:Class="CasherSystem.Views.ReturnsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Title="مرتجعات"
+      FlowDirection="RightToLeft"
+      Background="{DynamicResource MaterialDesignPaper}">
+    
+    <Page.Resources>
+        <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="المرتجعات" 
+                      FontSize="32" 
+                      FontWeight="Bold"
+                      Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+            <TextBlock Text="معالجة مرتجعات المنتجات وإصدار المبالغ المستردة" 
+                      FontSize="16" 
+                      Foreground="{DynamicResource MaterialDesignBodyLight}"
+                      Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Sale Selection and Items -->
+            <materialDesign:Card Grid.Column="0" Margin="0,0,10,0" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="اختر عملية البيع للمراجعة" 
+                              FontSize="20" 
+                              FontWeight="Bold"
+                              Margin="0,0,0,20"/>
+
+                 
+
+                    <!-- Secret Number Validation -->
+                    <!-- Secret Number Validation -->
+<Grid Margin="0,0,0,20">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+    
+    <TextBox Grid.Column="0"
+            materialDesign:HintAssist.Hint="كود الفاتورة (من الفاتورة المطبوعة)"
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            Text="{Binding SecretCode, UpdateSourceTrigger=PropertyChanged}"
+            Margin="0,0,10,0"/>
+    
+    <Button Grid.Column="1"
+            Height="40"
+           Content="إيجاد الفاتورة"
+           Style="{StaticResource MaterialDesignRaisedButton}"
+           Click="FindReceiptButton_Click"
+           ToolTip="البحث عن الفاتورة باستخدام الكود"
+           Padding="12,8"/>
+</Grid>
+
+                    <!-- Sale Details -->
+                    <TextBlock Text="عناصر البيع" 
+                              FontSize="16" 
+                              FontWeight="Bold"
+                              Margin="0,0,0,10"/>
+
+                    <DataGrid ItemsSource="{Binding SaleDetails}"
+                             SelectedItem="{Binding SelectedSaleDetail}"
+                             AutoGenerateColumns="False"
+                             CanUserAddRows="False"
+                             CanUserDeleteRows="False"
+                             IsReadOnly="True"
+                             GridLinesVisibility="Horizontal"
+                             HeadersVisibility="Column"
+                             Margin="0,0,0,20"
+                             MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="الصنف" Binding="{Binding Product.Name}" Width="*"/>
+                            <DataGridTextColumn Header="المقاس" Binding="{Binding Product.Size}" Width="80"/>
+                            <DataGridTextColumn Header="الكمية المباعة" Binding="{Binding Quantity}" Width="80"/>
+                            <DataGridTextColumn Header="السعر" Binding="{Binding Price, StringFormat=C}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Return Quantity -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                materialDesign:HintAssist.Hint="الكمية المرتجعة"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                Text="{Binding ReturnQuantity, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Grid.Column="1"
+                               Content="إضافة للارتجاع"
+                               Style="{StaticResource ActionButtonStyle}"
+                               Click="AddToReturnButton_Click"/>
+                    </Grid>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- Right Panel - Return Items -->
+            <materialDesign:Card Grid.Column="1" Margin="10,0,0,0" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <TextBlock Text="العناصر المرتجعة" 
+                                  FontSize="20" 
+                                  FontWeight="Bold"
+                                  Margin="0,0,0,20"/>
+
+                        <!-- Return Items -->
+                        <DataGrid ItemsSource="{Binding ReturnItems}"
+                                 AutoGenerateColumns="False"
+                                 CanUserAddRows="False"
+                                 CanUserDeleteRows="False"
+                                 IsReadOnly="True"
+                                 GridLinesVisibility="Horizontal"
+                                 HeadersVisibility="Column"
+                                 Margin="0,0,0,20"
+                                 MaxHeight="300">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="الصنف" Binding="{Binding Product.Name}" Width="*"/>
+                                <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="50"/>
+                                <DataGridTextColumn Header="السعر" Binding="{Binding Price, StringFormat=C}" Width="80"/>
+                                <DataGridTextColumn Header="الإجمالي" Binding="{Binding Total, StringFormat=C}" Width="80"/>
+                                <DataGridTemplateColumn Header="إجراء" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="إزالة"
+                                                   Style="{StaticResource MaterialDesignFlatButton}"
+                                                   Command="{Binding DataContext.RemoveFromReturnCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                   CommandParameter="{Binding}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Total Refund -->
+                        <Grid Margin="0,0,0,20">
+                            <TextBlock Text="المبلغ المسترد:" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding TotalRefund, StringFormat=C}" 
+                                      FontSize="18" 
+                                      FontWeight="Bold" 
+                                      HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- Action Buttons -->
+                        <StackPanel>
+                            <Button Content="معالجة الإرجاع"
+                                   Style="{StaticResource ActionButtonStyle}"
+                                   Click="ProcessReturnButton_Click"
+                                   Margin="0,0,0,10"/>
+
+                            <Button Content="طباعة الإيصال"
+                                   Style="{StaticResource ActionButtonStyle}"
+                                   Click="PrintReturnReceiptButton_Click"
+                                   Margin="0,0,0,10"/>
+
+                            <Button Content="تفريغ المرتجعات"
+                                   Style="{StaticResource ActionButtonStyle}"
+                                   Click="ClearReturnButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</Page>

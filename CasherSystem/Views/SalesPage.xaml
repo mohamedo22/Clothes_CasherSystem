@@ -1,0 +1,253 @@
+﻿<Page x:Class="CasherSystem.Views.SalesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Title="&#x0627;&#x0644;&#x0645;&#x0628;&#x064A;&#x0639;&#x0627;&#x062A;"
+      FlowDirection="RightToLeft"
+      Background="{DynamicResource MaterialDesignPaper}">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="&#x0627;&#x0644;&#x0645;&#x0628;&#x064A;&#x0639;&#x0627;&#x062A;" 
+                      FontSize="32" 
+                      FontWeight="Bold"
+                      Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+            <TextBlock Text="&#x0645;&#x0639;&#x0627;&#x0644;&#x062C;&#x0629; &#x0645;&#x0628;&#x064A;&#x0639;&#x0627;&#x062A; &#x0627;&#x0644;&#x0639;&#x0645;&#x0644;&#x0627;&#x0621; &#x0648;&#x0625;&#x0646;&#x0634;&#x0627;&#x0621; &#x0627;&#x0644;&#x0641;&#x0648;&#x0627;&#x062A;&#x064A;&#x0631;" 
+                      FontSize="16" 
+                      Foreground="{DynamicResource MaterialDesignBodyLight}"
+                      Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Product Search and Selection -->
+            <materialDesign:Card Grid.Column="0" Margin="0,0,10,0" Padding="20">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                    <TextBlock Text="&#x0627;&#x062E;&#x062A;&#x064A;&#x0627;&#x0631; &#x0627;&#x0644;&#x0645;&#x0646;&#x062A;&#x062C;&#x0627;&#x062A;" 
+                              FontSize="20" 
+                              FontWeight="Bold"
+                              Margin="0,0,0,20"/>
+
+                    <!-- Search -->
+                    <Grid Margin="0,0,0,20" Width="250">
+                        <TextBox materialDesign:HintAssist.Hint="ابحث عن المنتجات بالباركود"
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+            Padding="8,12,40,12"/>
+
+                        <Button HorizontalAlignment="Right"
+            Style="{StaticResource MaterialDesignIconButton}"
+            Click="SearchButton_Click"
+            ToolTip="بحث"
+            Background="Transparent"
+            Width="36"
+            Height="36"
+            Margin="0,0,4,0"
+            VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Magnify" 
+                               Width="20" 
+                               Height="20"
+                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Product List -->
+                    <DataGrid ItemsSource="{Binding Products}"
+                             SelectedItem="{Binding SelectedProduct}"
+                             AutoGenerateColumns="False"
+                             CanUserAddRows="False"
+                             CanUserDeleteRows="False"
+                             IsReadOnly="True"
+                             GridLinesVisibility="Horizontal"
+                             HeadersVisibility="Column"
+                             Margin="0,0,0,20"
+                             MaxHeight="300">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0627;&#x0633;&#x0645;" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x0642;&#x0627;&#x0633;" Binding="{Binding Size}" Width="80"/>
+                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0644;&#x0648;&#x0646;" Binding="{Binding Color}" Width="80"/>
+                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x062E;&#x0632;&#x0648;&#x0646;" Binding="{Binding Quantity}" Width="80"/>
+                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0633;&#x0639;&#x0631;" Binding="{Binding SellPrice, StringFormat=C}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Quantity and Add to Cart -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                materialDesign:HintAssist.Hint="&#x0627;&#x0644;&#x0643;&#x0645;&#x064A;&#x0629;"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Grid.Column="1"
+                               Content="&#x0625;&#x0636;&#x0627;&#x0641;&#x0629; &#x0625;&#x0644;&#x0649; &#x0627;&#x0644;&#x0633;&#x0644;&#x0629;"
+                               Style="{StaticResource ActionButtonStyle}"
+                               Click="AddToCartButton_Click"
+                               Margin="0,0,10,0"/>
+
+                        <Button Grid.Column="2"
+                               Content="&#x062A;&#x0641;&#x0631;&#x064A;&#x063A; &#x0627;&#x0644;&#x0633;&#x0644;&#x0629;"
+                               Style="{StaticResource ActionButtonStyle}"
+                               Click="ClearCartButton_Click"/>
+                    </Grid>
+                </StackPanel>
+                </ScrollViewer> 
+            </materialDesign:Card>
+
+            <!-- Right Panel - Cart and Totals -->
+            <materialDesign:Card Grid.Column="1" Margin="10,0,0,0" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <TextBlock Text="&#x0633;&#x0644;&#x0629; &#x0627;&#x0644;&#x062A;&#x0633;&#x0648;&#x0642;" 
+                      FontSize="20" 
+                      FontWeight="Bold"
+                      Margin="0,0,0,20"/>
+
+                        <!-- Cart Items -->
+                        <DataGrid ItemsSource="{Binding CartItems}"
+                     AutoGenerateColumns="False"
+                     CanUserAddRows="False"
+                     CanUserDeleteRows="False"
+                     IsReadOnly="True"
+                     GridLinesVisibility="Horizontal"
+                     HeadersVisibility="Column"
+                     Margin="0,0,0,20"
+                     MaxHeight="200">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0635;&#x0646;&#x0641;" Binding="{Binding Product.Name}" Width="*"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0643;&#x0645;&#x064A;&#x0629;" Binding="{Binding Quantity}" Width="50"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0625;&#x062C;&#x0645;&#x0627;&#x0644;&#x064A;" Binding="{Binding Total, StringFormat=C}" Width="80"/>
+                                <DataGridTemplateColumn Header="&#x0625;&#x062C;&#x0631;&#x0627;&#x0621;" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="&#x0625;&#x0632;&#x0627;&#x0644;&#x0629;"
+                                       Style="{StaticResource MaterialDesignFlatButton}"
+                                       Click="RemoveFromCartButton_Click"
+                                       Tag="{Binding}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Discount -->
+                        <TextBox materialDesign:HintAssist.Hint="&#x0645;&#x0628;&#x0644;&#x063A; &#x0627;&#x0644;&#x062E;&#x0635;&#x0645;"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    Margin="0,0,0,20"
+                    Text="{Binding Discount, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <!-- Payment Method -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="طريقة الدفع" 
+                                       FontWeight="Bold" 
+                                       Margin="0,0,0,8"/>
+                            <ComboBox ItemsSource="{Binding PaymentMethods}"
+                                      SelectedItem="{Binding SelectedPaymentMethod}"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      materialDesign:HintAssist.Hint="اختر طريقة الدفع">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Debt Payment Fields (Visible when Debt is selected) -->
+                        <StackPanel x:Name="DebtPaymentPanel" 
+                                    Margin="0,0,0,20"
+                                    Visibility="{Binding IsDebtPayment, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                            <!-- Customer Name -->
+                            <TextBox materialDesign:HintAssist.Hint="اسم العميل"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                    Margin="0,0,0,10"
+                                    Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <!-- Phone Number -->
+                            <TextBox materialDesign:HintAssist.Hint="رقم الهاتف"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                    Margin="0,0,0,10"
+                                    Text="{Binding CustomerPhone, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <!-- Paid Amount -->
+                            <TextBox materialDesign:HintAssist.Hint="المبلغ المدفوع"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                    Margin="0,0,0,10"
+                                    Text="{Binding PaidAmount, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <!-- Remaining Amount (Read-only) -->
+                            <TextBox materialDesign:HintAssist.Hint="المبلغ المتبقي"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                    IsReadOnly="True"
+                                    Foreground="Gray"
+                                    Text="{Binding RemainingAmount, StringFormat=C, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <!-- Totals -->
+                        <StackPanel Margin="0,0,0,20">
+                            <Grid Margin="0,5">
+                                <TextBlock Text="&#x0627;&#x0644;&#x0645;&#x062C;&#x0645;&#x0648;&#x0639; &#x0627;&#x0644;&#x0641;&#x0631;&#x0639;&#x064A;:" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Total, StringFormat=C}" 
+                              FontWeight="Bold" 
+                              HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,5">
+                                <TextBlock Text="&#x0627;&#x0644;&#x062E;&#x0635;&#x0645;:" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Discount, StringFormat=C}" 
+                              FontWeight="Bold" 
+                              HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,5">
+                                <TextBlock Text="&#x0627;&#x0644;&#x0645;&#x062C;&#x0645;&#x0648;&#x0639; &#x0627;&#x0644;&#x0643;&#x0644;&#x064A;:" FontSize="18" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding NetTotal, StringFormat=C}" 
+                              FontSize="18" 
+                              FontWeight="Bold" 
+                              HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Action Buttons -->
+                        <StackPanel>
+                            <Button Content="&#x062D;&#x0641;&#x0638; &#x0627;&#x0644;&#x0628;&#x064A;&#x0639;"
+                       Style="{StaticResource ActionButtonStyle}"
+                       Click="SaveSaleButton_Click"
+                       Margin="0,0,0,10"/>
+
+                            <Button Content="&#x0637;&#x0628;&#x0627;&#x0639;&#x0629; &#x0627;&#x0644;&#x0641;&#x0627;&#x062A;&#x0648;&#x0631;&#x0629;"
+                       Style="{StaticResource ActionButtonStyle}"
+                       Click="PrintReceiptButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</Page>

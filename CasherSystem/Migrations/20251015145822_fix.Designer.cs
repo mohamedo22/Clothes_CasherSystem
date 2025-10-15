@@ -4,6 +4,7 @@ using CasherSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasherSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251015145822_fix")]
+    partial class fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -257,6 +260,9 @@ namespace CasherSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecretCode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -276,6 +282,8 @@ namespace CasherSystem.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
@@ -340,21 +348,6 @@ namespace CasherSystem.Migrations
                     b.ToTable("ProductReturn");
                 });
 
-            modelBuilder.Entity("ProductSale", b =>
-                {
-                    b.Property<int>("SalesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("productsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SalesId", "productsId");
-
-                    b.HasIndex("productsId");
-
-                    b.ToTable("ProductSale");
-                });
-
             modelBuilder.Entity("CasherSystem.Models.Purchase", b =>
                 {
                     b.OwnsOne("CasherSystem.Models.Supplier", "Supplier", b1 =>
@@ -401,6 +394,10 @@ namespace CasherSystem.Migrations
 
             modelBuilder.Entity("CasherSystem.Models.Sale", b =>
                 {
+                    b.HasOne("CasherSystem.Models.Product", null)
+                        .WithMany("Sales")
+                        .HasForeignKey("ProductId");
+
                     b.HasOne("CasherSystem.Models.UserInfo", "User")
                         .WithMany("Sales")
                         .HasForeignKey("UserId")
@@ -424,19 +421,9 @@ namespace CasherSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProductSale", b =>
+            modelBuilder.Entity("CasherSystem.Models.Product", b =>
                 {
-                    b.HasOne("CasherSystem.Models.Sale", null)
-                        .WithMany()
-                        .HasForeignKey("SalesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CasherSystem.Models.Product", null)
-                        .WithMany()
-                        .HasForeignKey("productsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Sales");
                 });
 
             modelBuilder.Entity("CasherSystem.Models.Sale", b =>

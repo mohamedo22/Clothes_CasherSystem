@@ -6,26 +6,67 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CasherSystem.Data;
 
 namespace CasherSystem.Views
 {
+
+
+
     public class PaymentMethod
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    public class CartItem
+    public class CartItem : INotifyPropertyChanged
     {
-        public int ProductId { get; set; }
-        public Product Product { get; set; } = null!;
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal Total { get; set; }
+        private int _productId;
+        private Product _product = null!;
+        private int _quantity;
+        private decimal _price;
+        private decimal _total;
+
+        public int ProductId
+        {
+            get => _productId;
+            set { _productId = value; OnPropertyChanged(); }
+        }
+
+        public Product Product
+        {
+            get => _product;
+            set { _product = value; OnPropertyChanged(); }
+        }
+
+        public int Quantity
+        {
+            get => _quantity;
+            set { _quantity = value; OnPropertyChanged(); }
+        }
+
+        public decimal Price
+        {
+            get => _price;
+            set { _price = value; OnPropertyChanged(); }
+        }
+
+        public decimal Total
+        {
+            get => _total;
+            set { _total = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public partial class SalesPage : Page, INotifyPropertyChanged
     {
+        private readonly AppDbContext dbContext;
         private string _searchTerm = string.Empty;
         private Product? _selectedProduct;
         private int _quantity = 1;
@@ -140,6 +181,8 @@ namespace CasherSystem.Views
             InitializeComponent();
             DataContext = this;
 
+            dbContext = App.GetService<AppDbContext>();
+
             // Initialize payment methods
             PaymentMethods = new List<PaymentMethod>
             {
@@ -149,15 +192,30 @@ namespace CasherSystem.Views
             SelectedPaymentMethod = PaymentMethods.First(); // Default to Cash
 
             // Initialize with sample data
-            LoadSampleData();
+            LoadData();
         }
 
-        private void LoadSampleData()
+        private string GenerateMixedCaseCode(int length = 8)
         {
-            // Add some sample products
-            Products.Add(new Product { Id = 1, Name = "قميص قطني", Barcode = "TSH001", Size = "M", Color = "أزرق", CostPrice = 15.00m, SellPrice = 25.00m, Quantity = 50 });
-            Products.Add(new Product { Id = 2, Name = "جينز", Barcode = "JEA001", Size = "L", Color = "أزرق", CostPrice = 35.00m, SellPrice = 60.00m, Quantity = 30 });
-            Products.Add(new Product { Id = 3, Name = "هودي", Barcode = "HOO001", Size = "XL", Color = "أسود", CostPrice = 40.00m, SellPrice = 75.00m, Quantity = 20 });
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            Random random = new Random();
+            string code = "";
+
+            for (int i = 0; i < length; i++)
+            {
+                code += chars[random.Next(chars.Length)];
+            }
+
+            return code;
+        }
+
+        private void LoadData()
+        {
+            var allProducts = dbContext.Products.ToList();
+
+            for (int i = 0; i < allProducts.Count; i++) {
+                Products.Add(allProducts[i]);
+            }
         }
 
         private void AddToCartButton_Click(object sender, RoutedEventArgs e)
@@ -167,8 +225,9 @@ namespace CasherSystem.Views
             var existingItem = CartItems.FirstOrDefault(item => item.ProductId == SelectedProduct.Id);
             if (existingItem != null)
             {
-                existingItem.Quantity += Quantity;
+                existingItem.Quantity = existingItem.Quantity + Quantity;
                 existingItem.Total = existingItem.Quantity * existingItem.Price;
+                OnPropertyChanged(nameof(CartItems));
             }
             else
             {
@@ -219,6 +278,48 @@ namespace CasherSystem.Views
         {
             if (CartItems.Count > 0 && NetTotal > 0)
             {
+                var newSale = new Sale
+                {
+                    Date = DateTime.Now,
+                    Discount = Discount,
+                    NetTotal = NetTotal,
+                    paidAmount = PaidAmount.Value,
+                    PaymentType = (SelectedPaymentMethod?.Name ?? "Cash").Length > 20 
+                        ? (SelectedPaymentMethod?.Name ?? "Cash").Substring(0, 20) 
+                        : (SelectedPaymentMethod?.Name ?? "Cash"),
+                    remainingAmount = RemainingAmount.Value,
+                    SecretCode = GenerateMixedCaseCode(),
+                    Total = Total
+
+                };
+                // Ensure products list is initialized before adding items
+                if (newSale.products == null)
+                {
+                    newSale.products = new List<Product>();
+                }
+                foreach (var item in CartItems)
+                {
+                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.Product.Id);
+                    if (product != null)
+                    {
+                        product.counterOfSell += 1;
+                        dbContext.Products.Update(product);
+                        dbContext.SaveChanges();
+                    }    
+                    newSale.products.Add(item.Product);
+                }
+                if (IsDebtPayment)
+                {
+                    newSale.User = new UserInfo
+                    {
+                        PhoneNumber = CustomerPhone,
+                        Username = CustomerName,
+                    };
+                }
+
+                dbContext.Sales.Add(newSale);
+                dbContext.SaveChanges();
+
                 MessageBox.Show("تم إتمام البيع بنجاح!", "نجح",
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -254,7 +355,19 @@ namespace CasherSystem.Views
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            // Search functionality can be implemented here
+            var searchedItem = dbContext.Products.FirstOrDefault(p => p.Barcode == searchTextBox.Text);
+
+            if (searchedItem == null)
+            {
+                MessageBox.Show("لم يتم العثور علي المنتج", "فشل",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Products.Clear();
+                Products.Add(searchedItem);
+            }
+
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

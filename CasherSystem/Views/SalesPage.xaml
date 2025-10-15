@@ -53,6 +53,7 @@
                     <Grid Margin="0,0,0,20" Width="250">
                         <TextBox materialDesign:HintAssist.Hint="ابحث عن المنتجات بالباركود"
             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            Name="searchTextBox"
             Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
             Padding="8,12,40,12"/>
 
@@ -169,6 +170,7 @@
                                        FontWeight="Bold" 
                                        Margin="0,0,0,8"/>
                             <ComboBox ItemsSource="{Binding PaymentMethods}"
+                                      Name="paymentTypeBox"
                                       SelectedItem="{Binding SelectedPaymentMethod}"
                                       Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                       materialDesign:HintAssist.Hint="اختر طريقة الدفع">

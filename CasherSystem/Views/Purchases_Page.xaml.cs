@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using CasherSystem.Data;
 
 namespace CasherSystem.Views
 {
     public partial class PurchaseFormPage : Page, INotifyPropertyChanged
     {
+        private readonly AppDbContext dbContext;
         private Purchase _currentPurchase = new Purchase();
         private string _formTitle = "إضافة شراء جديد";
         private string _formSubtitle = "أدخل بيانات عملية الشراء الجديدة";
@@ -17,6 +19,7 @@ namespace CasherSystem.Views
         private bool _canSave = true;
         private ObservableCollection<string> _validationErrors = new ObservableCollection<string>();
         private bool _hasValidationErrors = false;
+        private bool _isEditMode = false;
 
         public Purchase CurrentPurchase
         {
@@ -66,10 +69,43 @@ namespace CasherSystem.Views
             set { _hasValidationErrors = value; OnPropertyChanged(); }
         }
 
+        public decimal Total
+        {
+            get => CurrentPurchase.Total;
+            set 
+            { 
+                CurrentPurchase.Total = value; 
+                OnPropertyChanged();
+                CalculateRemainingAmount();
+            }
+        }
+
+        public decimal PaidAmount
+        {
+            get => CurrentPurchase.PaidAmount;
+            set 
+            { 
+                CurrentPurchase.PaidAmount = value; 
+                OnPropertyChanged();
+                CalculateRemainingAmount();
+            }
+        }
+
+        public decimal RemainingAmount
+        {
+            get => CurrentPurchase.RemainingAmount;
+            set 
+            { 
+                CurrentPurchase.RemainingAmount = value; 
+                OnPropertyChanged();
+            }
+        }
+
         public PurchaseFormPage()
         {
             InitializeComponent();
             DataContext = this;
+            dbContext = App.GetService<AppDbContext>();
             InitializeNewPurchase();
         }
 
@@ -77,6 +113,7 @@ namespace CasherSystem.Views
         {
             InitializeComponent();
             DataContext = this;
+            dbContext = App.GetService<AppDbContext>();
             LoadPurchaseForEdit(purchaseToEdit);
         }
 
@@ -98,39 +135,83 @@ namespace CasherSystem.Views
         private void LoadPurchaseForEdit(Purchase purchase)
         {
             CurrentPurchase = purchase;
+            _isEditMode = true;
             FormTitle = "تعديل بيانات الشراء";
             FormSubtitle = "قم بتعديل بيانات عملية الشراء المحددة";
             FormMode = "وضع التعديل";
+            CalculateRemainingAmount();
+        }
+
+        private void CalculateRemainingAmount()
+        {
+            RemainingAmount = Total - PaidAmount;
         }
 
         private void SavePurchaseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ValidateForm())
+            if (!ValidateForm())
             {
-                // Save logic here
-                StatusMessage = "تم حفظ بيانات الشراء بنجاح";
-                MessageBox.Show("تم حفظ عملية الشراء بنجاح!", "نجاح",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                StatusMessage = "يرجى تصحيح الأخطاء قبل الحفظ";
+                return;
             }
-            else
+
+            try
             {
-                StatusMessage = "يوجد أخطاء في البيانات المدخلة";
+                // Calculate remaining amount
+                CurrentPurchase.RemainingAmount = CurrentPurchase.Total - CurrentPurchase.PaidAmount;
+
+                if (_isEditMode)
+                {
+                    // Update existing purchase
+                    var existingPurchase = dbContext.Purchases.Find(CurrentPurchase.Id);
+                    if (existingPurchase != null)
+                    {
+                        existingPurchase.Date = CurrentPurchase.Date;
+                        existingPurchase.Supplier = CurrentPurchase.Supplier;
+                        existingPurchase.Total = CurrentPurchase.Total;
+                        existingPurchase.PaidAmount = CurrentPurchase.PaidAmount;
+                        existingPurchase.RemainingAmount = CurrentPurchase.RemainingAmount;
+                        
+                        dbContext.SaveChanges();
+                        
+                        StatusMessage = "تم تحديث بيانات الشراء بنجاح";
+                        MessageBox.Show("تم تحديث عملية الشراء بنجاح!", "نجاح",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        StatusMessage = "لم يتم العثور على عملية الشراء للتحديث";
+                        MessageBox.Show("لم يتم العثور على عملية الشراء المحددة!", "خطأ",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    // Add new purchase
+                    dbContext.Purchases.Add(CurrentPurchase);
+                    dbContext.SaveChanges();
+                    
+                    StatusMessage = "تم حفظ بيانات الشراء بنجاح";
+                    MessageBox.Show("تم حفظ عملية الشراء بنجاح!", "نجاح",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                // Navigate back to purchases list
+                NavigationService?.GoBack();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ في حفظ البيانات";
+                MessageBox.Show($"حدث خطأ أثناء حفظ البيانات: {ex.Message}", "خطأ",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Navigate back or clear form
-            if (MessageBox.Show("هل تريد إلغاء العملية؟", "تأكيد الإلغاء",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                InitializeNewPurchase();
-                StatusMessage = "تم إلغاء العملية";
-            }
-        }
 
         private void ClearFormButton_Click(object sender, RoutedEventArgs e)
         {
+            _isEditMode = false;
             InitializeNewPurchase();
             StatusMessage = "تم تفريغ الحقول";
         }
@@ -156,7 +237,6 @@ namespace CasherSystem.Views
                 ValidationErrors.Add("المبلغ المدفوع لا يمكن أن يكون أكبر من الإجمالي");
 
             HasValidationErrors = ValidationErrors.Count > 0;
-            CanSave = !HasValidationErrors;
 
             return !HasValidationErrors;
         }

@@ -1,3 +1,4 @@
+using CasherSystem.Data;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,9 +15,9 @@ namespace CasherSystem.Views
 
     public partial class DashboardPage : UserControl
     {
+        private readonly AppDbContext dbContext;
         private decimal _todaySalesTotal = 0;
         private int _todaySalesCount = 0;
-        private string _topProductName = "لا توجد بيانات";
         private ObservableCollection<TopSellingProductData> _topSellingProductsList = new();
 
         public decimal TodaySalesTotal
@@ -31,11 +32,6 @@ namespace CasherSystem.Views
             set => _todaySalesCount = value;
         }
 
-        public string TopProductName
-        {
-            get => _topProductName;
-            set => _topProductName = value;
-        }
 
         public ObservableCollection<TopSellingProductData> TopSellingProductsList
         {
@@ -48,61 +44,50 @@ namespace CasherSystem.Views
             InitializeComponent();
             DataContext = this;
 
-            // Initialize with sample data
-            TodaySalesTotal = 1250.50m;
-            TodaySalesCount = 15;
-            TopProductName = "قميص قطني";
+            dbContext = App.GetService<AppDbContext>();
+
+            var todaySales = dbContext.Sales.Where(s => s.Date.Date == DateTime.Now.Date).ToList();
+
+            TodaySalesTotal = todaySales.Sum(s => s.NetTotal);
+
+            TodaySalesCount = todaySales.Count();
             
             LoadTopSellingProducts();
         }
 
         private void LoadTopSellingProducts()
         {
-            TopSellingProductsList.Add(new TopSellingProductData
+            var top5Sales = dbContext.Products
+                               .OrderByDescending(s => s.counterOfSell)
+                               .Take(5)
+                               .ToList();
+            TopSellingProductsList.Clear();
+            TopSellingProductsList = new ObservableCollection<TopSellingProductData>(
+                top5Sales.Select((p, index) => new TopSellingProductData
+                {
+                    Rank = index + 1,
+                    ProductName = p.Name,
+                    QuantitySold = p.counterOfSell,
+                    Revenue = p.counterOfSell * p.SellPrice
+                })
+            );
+            for (int i = 0; i < TopSellingProductsList.Count; i++)
             {
-                Rank = 1,
-                ProductName = "قميص قطني",
-                QuantitySold = 25,
-                Revenue = 625.00m
-            });
+                var productNameControl = FindName($"Product{i + 1}Name") as TextBlock;
+                var quantityControl = FindName($"Product{i + 1}QuantitySold") as TextBlock;
 
-            TopSellingProductsList.Add(new TopSellingProductData
-            {
-                Rank = 2,
-                ProductName = "جينز",
-                QuantitySold = 18,
-                Revenue = 1080.00m
-            });
 
-            TopSellingProductsList.Add(new TopSellingProductData
-            {
-                Rank = 3,
-                ProductName = "هودي",
-                QuantitySold = 12,
-                Revenue = 900.00m
-            });
+                productNameControl.Text = TopSellingProductsList[i].ProductName;
 
-            TopSellingProductsList.Add(new TopSellingProductData
-            {
-                Rank = 4,
-                ProductName = "فستان صيفي",
-                QuantitySold = 10,
-                Revenue = 450.00m
-            });
+                quantityControl.Text = TopSellingProductsList[i].QuantitySold.ToString();
 
-            TopSellingProductsList.Add(new TopSellingProductData
-            {
-                Rank = 5,
-                ProductName = "حذاء رياضي",
-                QuantitySold = 8,
-                Revenue = 720.00m
-            });
+
+            }
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            // Placeholder for refresh functionality
-            // In a real application, this would load data from the database
+            LoadTopSellingProducts();
         }
     }
 }

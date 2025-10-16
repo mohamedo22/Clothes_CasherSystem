@@ -11,9 +11,10 @@ namespace CasherSystem.Models
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        
+
+        [Required]
         [MaxLength(50)]
-        public string? Barcode { get; set; }
+        public string Barcode { get; set; }
         
         [MaxLength(20)]
         public string? Size { get; set; }
@@ -36,7 +37,7 @@ namespace CasherSystem.Models
         public bool IsActive { get; set; } = true;
         
         // Navigation properties
-        public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+        public virtual ICollection<SaledProduct> Sales { get; set; } = new List<SaledProduct>();
         public virtual ICollection<Return> Returns { get; set; } = new List<Return>();
     }
 }

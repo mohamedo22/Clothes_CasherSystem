@@ -109,6 +109,16 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}"
+                           Click="ProductsButton_Click">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TshirtCrew" Width="24" Height="24" Margin="0,0,15,0"/>
+                                <TextBlock Text="المنتجات" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
                 </StackPanel>
 
                 <!-- Exit Button -->

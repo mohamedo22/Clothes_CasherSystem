@@ -44,20 +44,28 @@
             <materialDesign:Card Grid.Column="0" Margin="0,0,10,0" Padding="20">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                    <TextBlock Text="&#x0627;&#x062E;&#x062A;&#x064A;&#x0627;&#x0631; &#x0627;&#x0644;&#x0645;&#x0646;&#x062A;&#x062C;&#x0627;&#x062A;" 
+                        <TextBlock Text="&#x0627;&#x062E;&#x062A;&#x064A;&#x0627;&#x0631; &#x0627;&#x0644;&#x0645;&#x0646;&#x062A;&#x062C;&#x0627;&#x062A;" 
                               FontSize="20" 
                               FontWeight="Bold"
                               Margin="0,0,0,20"/>
 
-                    <!-- Search -->
-                    <Grid Margin="0,0,0,20" Width="250">
-                        <TextBox materialDesign:HintAssist.Hint="ابحث عن المنتجات بالباركود"
+                        <!-- Search and Reload Buttons -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Search Box -->
+                            <Grid Grid.Column="0" Margin="0,0,10,0" Width="250">
+                                <TextBox materialDesign:HintAssist.Hint="ابحث عن المنتجات بالباركود"
             Style="{StaticResource MaterialDesignOutlinedTextBox}"
             Name="searchTextBox"
             Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
             Padding="8,12,40,12"/>
 
-                        <Button HorizontalAlignment="Right"
+                                <Button HorizontalAlignment="Right"
             Style="{StaticResource MaterialDesignIconButton}"
             Click="SearchButton_Click"
             ToolTip="بحث"
@@ -66,15 +74,42 @@
             Height="36"
             Margin="0,0,4,0"
             VerticalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Magnify" 
+                                    <materialDesign:PackIcon Kind="Magnify" 
                                Width="20" 
                                Height="20"
                                Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                        </Button>
-                    </Grid>
+                                </Button>
+                            </Grid>
 
-                    <!-- Product List -->
-                    <DataGrid ItemsSource="{Binding Products}"
+
+                            <!-- Clear Search Button -->
+                            <Button Grid.Column="2"
+                                   Content="عرض الكل"
+                                   Style="{StaticResource ActionButtonStyle}"
+                                   Click="ShowAllButton_Click"
+                                   ToolTip="عرض جميع المنتجات">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="FormatListBulleted" Margin="0,0,5,0" Width="16" Height="16"/>
+                                            <TextBlock Text="عرض الكل" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+
+                        <!-- Status Message Display -->
+                        <TextBlock Text="{Binding StatusMessage}" 
+                               Margin="0,0,0,10"
+                               FontStyle="Italic"
+                               Foreground="{DynamicResource PrimaryHueMidBrush}"
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"
+                               FontWeight="SemiBold"/>
+
+                        <!-- Product List -->
+                        <DataGrid ItemsSource="{Binding Products}"
                              SelectedItem="{Binding SelectedProduct}"
                              AutoGenerateColumns="False"
                              CanUserAddRows="False"
@@ -84,42 +119,42 @@
                              HeadersVisibility="Column"
                              Margin="0,0,0,20"
                              MaxHeight="300">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0627;&#x0633;&#x0645;" Binding="{Binding Name}" Width="*"/>
-                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x0642;&#x0627;&#x0633;" Binding="{Binding Size}" Width="80"/>
-                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0644;&#x0648;&#x0646;" Binding="{Binding Color}" Width="80"/>
-                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x062E;&#x0632;&#x0648;&#x0646;" Binding="{Binding Quantity}" Width="80"/>
-                            <DataGridTextColumn Header="&#x0627;&#x0644;&#x0633;&#x0639;&#x0631;" Binding="{Binding SellPrice, StringFormat=C}" Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0627;&#x0633;&#x0645;" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x0642;&#x0627;&#x0633;" Binding="{Binding Size}" Width="80"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0644;&#x0648;&#x0646;" Binding="{Binding Color}" Width="80"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0645;&#x062E;&#x0632;&#x0648;&#x0646;" Binding="{Binding Quantity}" Width="80"/>
+                                <DataGridTextColumn Header="&#x0627;&#x0644;&#x0633;&#x0639;&#x0631;" Binding="{Binding SellPrice, StringFormat=C}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                    <!-- Quantity and Add to Cart -->
-                    <Grid Margin="0,0,0,20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <!-- Quantity and Add to Cart -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
+                            <TextBox Grid.Column="0"
                                 materialDesign:HintAssist.Hint="&#x0627;&#x0644;&#x0643;&#x0645;&#x064A;&#x0629;"
                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                 Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
                                 Margin="0,0,10,0"/>
 
-                        <Button Grid.Column="1"
+                            <Button Grid.Column="1"
                                Content="&#x0625;&#x0636;&#x0627;&#x0641;&#x0629; &#x0625;&#x0644;&#x0649; &#x0627;&#x0644;&#x0633;&#x0644;&#x0629;"
                                Style="{StaticResource ActionButtonStyle}"
                                Click="AddToCartButton_Click"
                                Margin="0,0,10,0"/>
 
-                        <Button Grid.Column="2"
+                            <Button Grid.Column="2"
                                Content="&#x062A;&#x0641;&#x0631;&#x064A;&#x063A; &#x0627;&#x0644;&#x0633;&#x0644;&#x0629;"
                                Style="{StaticResource ActionButtonStyle}"
                                Click="ClearCartButton_Click"/>
-                    </Grid>
-                </StackPanel>
-                </ScrollViewer> 
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
             </materialDesign:Card>
 
             <!-- Right Panel - Cart and Totals -->
@@ -243,13 +278,20 @@
                        Click="SaveSaleButton_Click"
                        Margin="0,0,0,10"/>
 
-                            <Button Content="&#x0637;&#x0628;&#x0627;&#x0639;&#x0629; &#x0627;&#x0644;&#x0641;&#x0627;&#x062A;&#x0648;&#x0631;&#x0629;"
-                       Style="{StaticResource ActionButtonStyle}"
-                       Click="PrintReceiptButton_Click"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </materialDesign:Card>
+
         </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Margin="0,10,0,0" Background="Transparent">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}" 
+                           Foreground="{DynamicResource PrimaryHueMidBrush}"
+                           FontWeight="SemiBold"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Page>

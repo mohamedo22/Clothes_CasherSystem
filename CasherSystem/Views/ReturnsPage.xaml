@@ -61,6 +61,7 @@
             materialDesign:HintAssist.Hint="كود الفاتورة (من الفاتورة المطبوعة)"
             Style="{StaticResource MaterialDesignOutlinedTextBox}"
             Text="{Binding SecretCode, UpdateSourceTrigger=PropertyChanged}"
+            Name="SecretCodeTextBox"
             Margin="0,0,10,0"/>
     
     <Button Grid.Column="1"
@@ -140,14 +141,13 @@
                                 <DataGridTextColumn Header="الصنف" Binding="{Binding Product.Name}" Width="*"/>
                                 <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="50"/>
                                 <DataGridTextColumn Header="السعر" Binding="{Binding Price, StringFormat=C}" Width="80"/>
-                                <DataGridTextColumn Header="الإجمالي" Binding="{Binding Total, StringFormat=C}" Width="80"/>
                                 <DataGridTemplateColumn Header="إجراء" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Button Content="إزالة"
                                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                                   Command="{Binding DataContext.RemoveFromReturnCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                   CommandParameter="{Binding}"/>
+                                                   Click="RemoveFromReturnButton_Click"
+                                                   Tag="{Binding}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -168,11 +168,6 @@
                             <Button Content="معالجة الإرجاع"
                                    Style="{StaticResource ActionButtonStyle}"
                                    Click="ProcessReturnButton_Click"
-                                   Margin="0,0,0,10"/>
-
-                            <Button Content="طباعة الإيصال"
-                                   Style="{StaticResource ActionButtonStyle}"
-                                   Click="PrintReturnReceiptButton_Click"
                                    Margin="0,0,0,10"/>
 
                             <Button Content="تفريغ المرتجعات"

@@ -34,7 +34,7 @@ namespace CasherSystem.Models
         // Navigation properties
         [ForeignKey("UserId")]
         public virtual UserInfo? User { get; set; }
-        public List<Product> products { get; set; }
+        public List<SaledProduct> products { get; set; }
         public  ICollection<Return> Returns { get; set; } = new List<Return>();
     }
 }

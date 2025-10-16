@@ -48,7 +48,9 @@ namespace CasherSystem.Views
 
             var todaySales = dbContext.Sales.Where(s => s.Date.Date == DateTime.Now.Date).ToList();
 
-            TodaySalesTotal = todaySales.Sum(s => s.NetTotal);
+            var todayReturns = dbContext.Returns.Where(r => r.Date.Date == DateTime.Now.Date).ToList();
+
+            TodaySalesTotal = todaySales.Sum(s => s.NetTotal) - todayReturns.Sum(s=>s.TotalRefund);
 
             TodaySalesCount = todaySales.Count();
             

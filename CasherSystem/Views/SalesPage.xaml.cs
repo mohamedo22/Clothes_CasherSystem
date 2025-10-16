@@ -1,12 +1,14 @@
+using CasherSystem.Data;
+using CasherSystem.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using CasherSystem.Models;
-using System.Linq;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using CasherSystem.Data;
+using System.Windows.Input;
 
 namespace CasherSystem.Views
 {
@@ -66,6 +68,7 @@ namespace CasherSystem.Views
 
     public partial class SalesPage : Page, INotifyPropertyChanged
     {
+        private InvoicePrinter _invoicePrinter = new InvoicePrinter();
         private readonly AppDbContext dbContext;
         private string _searchTerm = string.Empty;
         private Product? _selectedProduct;
@@ -83,6 +86,12 @@ namespace CasherSystem.Views
         private string _customerPhone = string.Empty;
         private int? _paidAmount = 0;
         private int? _remainingAmount = 0;
+        private string _statusMessage = "جاهز";
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set { _statusMessage = value; OnPropertyChanged(); }
+        }
 
         public string SearchTerm
         {
@@ -181,6 +190,9 @@ namespace CasherSystem.Views
             InitializeComponent();
             DataContext = this;
 
+            searchTextBox.Focus();
+            searchTextBox.KeyDown += SearchTextBox_KeyDown;
+
             dbContext = App.GetService<AppDbContext>();
 
             // Initialize payment methods
@@ -194,8 +206,79 @@ namespace CasherSystem.Views
             // Initialize with sample data
             LoadData();
         }
+        private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string barcode = searchTextBox.Text.Trim();
 
-        private string GenerateMixedCaseCode(int length = 8)
+                if (!string.IsNullOrEmpty(barcode))
+                {
+                    ProcessBarcode(barcode);
+
+                    // Auto-clear and keep focus for next scan
+                    searchTextBox.Clear();
+                    searchTextBox.Focus();
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        private async void ProcessBarcode(string barcode)
+        {
+            try
+            {
+                searchTextBox.IsEnabled = false;
+                StatusMessage = "جاري البحث في قاعدة البيانات...";
+
+                // Search in database (if you have DbContext)
+                var product = await dbContext.Products
+                    .FirstOrDefaultAsync(p => p.Barcode == barcode);
+
+                if (product != null)
+                {
+                    // Add to local collection if not exists
+                    if (!Products.Any(p => p.Id == product.Id))
+                    {
+                        Products.Add(product);
+                    }
+
+                    Products.Clear();
+                    Products.Add(product);
+
+                    SelectedProduct = product;
+                    Quantity = 1;
+                    StatusMessage = $"تم العثور على: {product.Name}";
+                }
+                else
+                {
+                    MessageBox.Show($"لا يوجد منتج مسجل بالباركود: {barcode}\n\n" +
+                                   "الأسباب المحتملة:\n" +
+                                   "• الباركود غير مسجل في النظام\n" +
+                                   "• خطأ في مسح الباركود\n" +
+                                   "• المنتج يحتاج إلى إضافته أولاً",
+                        "منتج غير موجود",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    StatusMessage = "المنتج غير مسجل";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"فشل الاتصال بقاعدة البيانات: {ex.Message}",
+                    "خطأ في النظام",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                searchTextBox.IsEnabled = true;
+                searchTextBox.Focus();
+            }
+        }
+        private string GenerateMixedCaseCode(int length = 12)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             Random random = new Random();
@@ -295,19 +378,9 @@ namespace CasherSystem.Views
                 // Ensure products list is initialized before adding items
                 if (newSale.products == null)
                 {
-                    newSale.products = new List<Product>();
+                    newSale.products = new List<SaledProduct>();
                 }
-                foreach (var item in CartItems)
-                {
-                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.Product.Id);
-                    if (product != null)
-                    {
-                        product.counterOfSell += 1;
-                        dbContext.Products.Update(product);
-                        dbContext.SaveChanges();
-                    }    
-                    newSale.products.Add(item.Product);
-                }
+                
                 if (IsDebtPayment)
                 {
                     newSale.User = new UserInfo
@@ -318,7 +391,28 @@ namespace CasherSystem.Views
                 }
 
                 dbContext.Sales.Add(newSale);
+
                 dbContext.SaveChanges();
+
+                foreach (var item in CartItems)
+                {
+                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.Product.Id);
+                    if (product != null)
+                    {
+                        product.counterOfSell += 1;
+                        product.Quantity -= item.Quantity;
+                        dbContext.Products.Update(product);
+                        dbContext.SaveChanges();
+                    }
+                    newSale.products.Add(new SaledProduct
+                    {
+                        Product = item.Product,
+                        saledQuantity = item.Quantity,
+                        Sale = newSale
+                    });
+                }
+
+                _invoicePrinter.PrintInvoice(newSale);
 
                 MessageBox.Show("تم إتمام البيع بنجاح!", "نجح",
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -327,14 +421,6 @@ namespace CasherSystem.Views
             }
         }
 
-        private void PrintReceiptButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (CartItems.Count > 0)
-            {
-                MessageBox.Show("Receipt printed successfully!", "Success",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
 
         private void ClearCartButton_Click(object sender, RoutedEventArgs e)
         {
@@ -375,6 +461,12 @@ namespace CasherSystem.Views
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void ShowAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            Products.Clear();
+            LoadData();
         }
     }
 }

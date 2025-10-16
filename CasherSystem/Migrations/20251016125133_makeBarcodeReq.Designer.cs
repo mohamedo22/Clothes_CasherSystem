@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasherSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251012151623_editTables")]
-    partial class editTables
+    [Migration("20251016125133_makeBarcodeReq")]
+    partial class makeBarcodeReq
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,7 @@ namespace CasherSystem.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Barcode")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -260,9 +261,6 @@ namespace CasherSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecretCode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -275,13 +273,43 @@ namespace CasherSystem.Migrations
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("paidAmount")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ProductId");
+                    b.Property<int?>("remainingAmount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Sales");
+                });
+
+            modelBuilder.Entity("CasherSystem.Models.SaledProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("saledQuantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SaledProduct");
                 });
 
             modelBuilder.Entity("CasherSystem.Models.UserInfo", b =>
@@ -388,16 +416,31 @@ namespace CasherSystem.Migrations
 
             modelBuilder.Entity("CasherSystem.Models.Sale", b =>
                 {
-                    b.HasOne("CasherSystem.Models.Product", null)
-                        .WithMany("Sales")
-                        .HasForeignKey("ProductId");
-
                     b.HasOne("CasherSystem.Models.UserInfo", "User")
                         .WithMany("Sales")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CasherSystem.Models.SaledProduct", b =>
+                {
+                    b.HasOne("CasherSystem.Models.Product", "Product")
+                        .WithMany("Sales")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CasherSystem.Models.Sale", "Sale")
+                        .WithMany("products")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("ProductReturn", b =>
@@ -423,6 +466,8 @@ namespace CasherSystem.Migrations
             modelBuilder.Entity("CasherSystem.Models.Sale", b =>
                 {
                     b.Navigation("Returns");
+
+                    b.Navigation("products");
                 });
 
             modelBuilder.Entity("CasherSystem.Models.UserInfo", b =>

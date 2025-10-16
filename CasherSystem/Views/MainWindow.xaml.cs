@@ -55,6 +55,12 @@ namespace CasherSystem.Views
             CurrentPage = reportsPage;
         }
 
+        private void NavigateToProducts()
+        {
+            var productsListPage = new ProductsListPage();
+            CurrentPage = productsListPage;
+        }
+
         private void Exit()
         {
             Application.Current.Shutdown();
@@ -84,6 +90,11 @@ namespace CasherSystem.Views
         private void ReportsButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToReports();
+        }
+
+        private void ProductsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToProducts();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

@@ -1,8 +1,12 @@
 using CasherSystem.Data;
 using CasherSystem.utilities;
+using Microsoft.Win32;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing.Printing;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -168,8 +172,16 @@ namespace CasherSystem.Views
 
         private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("ميزة تصدير Excel قيد التطوير", "معلومات",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var excel = new CasherSystem.utilities.ExcelGenerator();
+            excel.ExportToExcel(
+                salesTotal: SalesTotal,
+                salesCount: SalesCount,
+                purchasesTotal: PurchasesTotal,
+                returnsTotal: ReturnsTotal,
+                netProfit: NetProfit,
+                startDate: StartDate,
+                endDate: EndDate
+            );
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

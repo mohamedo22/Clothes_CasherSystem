@@ -9,7 +9,12 @@
     <AssemblyTitle>نظام نقاط البيع - متجر الملابس</AssemblyTitle>
     <AssemblyDescription>نظام نقاط البيع الحديث للمتاجر</AssemblyDescription>
     <NeutralLanguage>ar-SA</NeutralLanguage>
+    <ApplicationIcon>Logo.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Logo.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BarcodeLib" Version="3.1.5" />
@@ -32,6 +37,10 @@
     <PackageReference Include="EPPlus" Version="6.2.10" />
     <PackageReference Include="System.Globalization" Version="4.3.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Logo.png" />
   </ItemGroup>
 
 </Project>

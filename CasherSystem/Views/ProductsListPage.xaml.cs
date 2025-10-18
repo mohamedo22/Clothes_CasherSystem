@@ -44,7 +44,7 @@ namespace CasherSystem.Views
 
         private void LoadProducts()
         {
-            var items = dbContext.Products.ToList();
+            var items = dbContext.syProducts.ToList();
             _allProducts = new ObservableCollection<Product>(items);
             Products = new ObservableCollection<Product>(items);
             StatusMessage = "تم تحميل المنتجات";
@@ -87,7 +87,7 @@ namespace CasherSystem.Views
             {
                 if (MessageBox.Show($"حذف المنتج {product.Name}?", "تأكيد", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    dbContext.Products.Remove(product);
+                    dbContext.syProducts.Remove(product);
                     dbContext.SaveChanges();
                     _allProducts.Remove(product);
                     Products.Remove(product);

@@ -23,11 +23,11 @@ namespace CasherSystem
                 .ConfigureServices((context, services) =>
                 {
                     // Database
-                    //services.AddDbContext<AppDbContext>(options =>
-                    //    options.UseSqlite("Data Source=pos_database.db"));
-
                     services.AddDbContext<AppDbContext>(options =>
-                        options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=casherSys;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"));
+                        options.UseSqlite("Data Source=sy_database.db"));
+
+                    //services.AddDbContext<AppDbContext>(options =>
+                    //    options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=casherSys;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 
                     // Views
                     services.AddTransient<LoginWindow>();
@@ -37,6 +37,7 @@ namespace CasherSystem
                     services.AddTransient<PurchasesPage>();
                     services.AddTransient<ReturnsPage>();
                     services.AddTransient<ReportsPage>();
+                    services.AddTransient<SaleDetailsPage>();
                 })
                 .Build();
 

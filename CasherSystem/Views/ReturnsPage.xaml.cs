@@ -227,12 +227,12 @@ namespace CasherSystem.Views
                 dbContext.SaveChanges();
                 foreach (var item in ReturnItems)
                 {
-                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.ProductId);
+                    var product = dbContext.syProducts.FirstOrDefault(p => p.Id == item.ProductId);
                     if (product != null)
                     {
                         product.Quantity += item.Quantity;
                         product.counterOfSell -= item.Quantity;
-                        dbContext.Products.Update(product);
+                        dbContext.syProducts.Update(product);
                         dbContext.SaveChanges();
                     }
                 }

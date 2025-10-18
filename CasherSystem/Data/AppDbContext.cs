@@ -9,9 +9,10 @@ namespace CasherSystem.Data
         {
         }
 
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Product> syProducts { get; set; }
         public DbSet<UserInfo> Users { get; set; }
         public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaledProduct> SaledProducts { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Return> Returns { get; set; }
 
@@ -30,6 +31,19 @@ namespace CasherSystem.Data
                 .HasOne(r => r.Sale)
                 .WithMany(s => s.Returns)
                 .HasForeignKey(r => r.SaleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure SaledProduct relationships
+            modelBuilder.Entity<SaledProduct>()
+                .HasOne(sp => sp.Sale)
+                .WithMany(s => s.products)
+                .HasForeignKey(sp => sp.SaleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SaledProduct>()
+                .HasOne(sp => sp.Product)
+                .WithMany()
+                .HasForeignKey(sp => sp.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Return entity has no ProcessedByUserId property, so no relationship configuration needed

@@ -59,7 +59,7 @@ namespace CasherSystem.Views
 
         private void LoadTopSellingProducts()
         {
-            var top5Sales = dbContext.Products
+            var top5Sales = dbContext.syProducts
                                .OrderByDescending(s => s.counterOfSell)
                                .Take(5)
                                .ToList();

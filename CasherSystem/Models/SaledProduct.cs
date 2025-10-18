@@ -15,5 +15,8 @@ namespace CasherSystem.Models
 
         public int SaleId { get; set; }
         public Sale Sale { get; set; }
+
+        // Calculated property for line total
+        public decimal Total => saledQuantity * Product?.SellPrice ?? 0;
     }
 }

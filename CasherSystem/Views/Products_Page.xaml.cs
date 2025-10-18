@@ -91,7 +91,7 @@ namespace CasherSystem.Views
 
             if (_isEditMode)
             {
-                var existing = dbContext.Products.Find(CurrentProduct.Id);
+                var existing = dbContext.syProducts.Find(CurrentProduct.Id);
                 if (existing != null)
                 {
                     existing.Name = CurrentProduct.Name;
@@ -107,7 +107,7 @@ namespace CasherSystem.Views
             }
             else
             {
-                dbContext.Products.Add(CurrentProduct);
+                dbContext.syProducts.Add(CurrentProduct);
                 dbContext.SaveChanges();
                 MessageBox.Show("تم حفظ المنتج", "نجاح", MessageBoxButton.OK, MessageBoxImage.Information);
             }

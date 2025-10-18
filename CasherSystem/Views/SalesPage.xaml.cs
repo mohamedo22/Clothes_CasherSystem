@@ -233,7 +233,7 @@ namespace CasherSystem.Views
                 StatusMessage = "جاري البحث في قاعدة البيانات...";
 
                 // Search in database (if you have DbContext)
-                var product = await dbContext.Products
+                var product = await dbContext.syProducts
                     .FirstOrDefaultAsync(p => p.Barcode == barcode);
 
                 if (product != null)
@@ -294,7 +294,7 @@ namespace CasherSystem.Views
 
         private void LoadData()
         {
-            var allProducts = dbContext.Products.ToList();
+            var allProducts = dbContext.syProducts.ToList();
 
             for (int i = 0; i < allProducts.Count; i++) {
                 Products.Add(allProducts[i]);
@@ -396,12 +396,12 @@ namespace CasherSystem.Views
 
                 foreach (var item in CartItems)
                 {
-                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.Product.Id);
+                    var product = dbContext.syProducts.FirstOrDefault(p => p.Id == item.Product.Id);
                     if (product != null)
                     {
                         product.counterOfSell += 1;
                         product.Quantity -= item.Quantity;
-                        dbContext.Products.Update(product);
+                        dbContext.syProducts.Update(product);
                         dbContext.SaveChanges();
                     }
                     newSale.products.Add(new SaledProduct
@@ -441,7 +441,7 @@ namespace CasherSystem.Views
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            var searchedItem = dbContext.Products.FirstOrDefault(p => p.Barcode == searchTextBox.Text);
+            var searchedItem = dbContext.syProducts.FirstOrDefault(p => p.Barcode == searchTextBox.Text);
 
             if (searchedItem == null)
             {

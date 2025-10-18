@@ -1,4 +1,5 @@
 using System.Windows;
+using CasherSystem.Models;
 
 namespace CasherSystem.Views
 {
@@ -36,6 +37,13 @@ namespace CasherSystem.Views
             var salesPage = new SalesPage();
             CurrentPage = salesPage;
         }
+
+        public void NavigateToSalesList()
+        {
+            var salesListPage = new SalesListPage();
+            CurrentPage = salesListPage;
+        }
+
 
         private void NavigateToPurchases()
         {
@@ -75,6 +83,11 @@ namespace CasherSystem.Views
         private void SalesButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToSales();
+        }
+
+        private void SalesListButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToSalesList();
         }
 
         private void PurchasesButton_Click(object sender, RoutedEventArgs e)

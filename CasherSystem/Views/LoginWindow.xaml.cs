@@ -54,7 +54,7 @@ namespace CasherSystem.Views
         {
             ErrorMessage = string.Empty;
 
-            if (Username == "admin" && Password == "1234")
+            if (Username == "admin" && Password == "fightClub12345678#")
             {
                 try
                 {

@@ -24,7 +24,7 @@ namespace CasherSystem
                 {
                     // Database
                     services.AddDbContext<AppDbContext>(options =>
-                        options.UseSqlite("Data Source=sy_database.db"));
+                        options.UseSqlite("Data Source=system_database.db"));
 
                     //services.AddDbContext<AppDbContext>(options =>
                     //    options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=casherSys;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"));
